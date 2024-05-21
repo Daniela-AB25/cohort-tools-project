@@ -9,6 +9,19 @@ const PORT = 5005;
 const cohortsData = require('./cohorts.json')
 const studentsData = require('./students.json')
 
+const mongoose = require("mongoose");
+const Cohort = require('./models/Cohort.model')
+const Student = require('./models/Student.model')
+
+
+mongoose
+  .connect("mongodb://127.0.0.1:27017/cohort-tools-api")
+  .then(x => console.log(`Connected to Database: "${x.connections[0].name}"`))
+  .catch(err => console.error("Error connecting to MongoDB", err));
+
+
+
+
 
 // INITIALIZE EXPRESS APP - https://expressjs.com/en/4x/api.html#express
 const app = express();
@@ -42,11 +55,17 @@ app.get("/docs", (req, res) => {
 });
 
 app.get('/api/cohorts', (req, res) => {
-  res.json(cohortsData)
+  Cohort
+    .find()
+    .then(cohorts => res.json(cohorts))
+    .catch(err => res.json({ status: 500, error: err }))
 });
 
 app.get('/api/students', (req, res) => {
-  res.json(studentsData)
+  Student
+    .find()
+    .then(students => res.json(students))
+    .catch(err => res.json({ status: 500, error: err }))
 })
 
 

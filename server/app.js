@@ -39,6 +39,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 
+
+
 // ROUTES - https://expressjs.com/en/starter/basic-routing.html
 // Devs Team - Start working on the routes here:
 // ...
@@ -52,6 +54,8 @@ app.get('/api/students', (req, res) => {
 
     .find()
     .populate('cohort')
+    .select({ firstName: 1, lastName: 1, program: 1 })   // proyección
+    .sort({ firstName: 1 })                             // ordenación
     .then(students => res.json(students))
     .catch(err => res.json({ status: 500, error: err }))
 })
@@ -116,6 +120,27 @@ app.delete('/api/students/:studentId', (req, res) => {
 })
 
 
+// filtros search params
+app.get('/api/students/search', (req, res) => {
+
+  res.send(req.query)
+  const { name } = req.query
+
+  Student
+    .findById({ firstName: { $regex: name, $options: 'i' } })
+    .populate('cohort')
+    .select()
+    .then(student => res.json(student))
+    .catch(err => res.json({ code: 500, errorDetails: err }))
+
+})
+
+
+app.get('/api/students/program', (req, res) => {
+
+})
+
+
 // -----COHORT ROUTES-----
 app.get('/api/cohorts', (req, res) => {
   Cohort
@@ -169,6 +194,17 @@ app.delete('/api/cohorts/:cohortId', (req, res) => {
 
 })
 
+
+
+// ERROR HANDLING
+// ... all your routes and other middleware ...
+
+// Import the custom error handling middleware:
+const { errorHandler, notFoundHandler } = require('./middleware/error-handling');
+
+// Set up custom error handling middleware:
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 
 // START SERVER
